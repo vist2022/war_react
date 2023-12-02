@@ -2,8 +2,7 @@ import React, {useRef} from 'react';
 import style from './GamePage.module.css';
 import {useHistory} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
-import {setPointsAction} from "../../redux/actions/pointsAction";
-import {removeCards, setCards} from "../../redux/actions/cardsAction";
+import {handleOnClickNext} from "../../utils/gameUtils";
 
 
 const GamePage = () => {
@@ -17,17 +16,6 @@ const GamePage = () => {
 	const roundNumber = useRef(1);
 	const nextStyle = useRef(style.redOnWhite);
 
-	const handleOnClickNext = () => {
-		if (cards.playersCards.length === 1) {
-			dispatch(setCards());
-			history.push('result');
-		} else {
-			dispatch(removeCards());
-			roundNumber.current++;
-		}
-	}
-
-
 	return (
 		<div className={'container w-50 h-75  mt-3 shadow p-3 mb-5 bg-body-tertiary rounded'}>
 			<div className={'row text-center fs-4 fw-bold text-danger'}><span>Round {roundNumber.current}</span></div>
@@ -40,11 +28,7 @@ const GamePage = () => {
 				</div>
 				<div className={'col align-self-center '}>
 					<div
-						onClick={() => {
-							handleOnClickNext();
-							nextStyle.current = nextStyle.current === style.redOnWhite ? style.whiteOnRed : style.redOnWhite;
-							dispatch(setPointsAction(parseInt(cards.computersCard[0].cost), parseInt(cards.playersCards[0].cost)));
-						}}
+						onClick={() => {handleOnClickNext(dispatch, history, roundNumber, cards, nextStyle)}}
 						className={`col align-self-center ${style.nextDiv}`}>
 						<p className={nextStyle.current}>NEXT</p>
 					</div>

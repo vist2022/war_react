@@ -1,8 +1,8 @@
-import React, {Component, useState} from 'react';
+import React from 'react';
 import LoginPage from "./components/LoginPage";
 import GamePage from "./components/GamePage/GamePage";
 import ResultPage from "./components/ResultPage";
-import {Route, Routes, Switch} from "react-router-dom";
+import {Route, Switch} from "react-router-dom";
 import ErrorPage from "./components/ErrorPage";
 
 const App = () => {
