@@ -1,81 +1,65 @@
-import React, {Component} from 'react';
-import {cardDeck} from "../../utils/constants";
-import {cardsDealing} from "../../utils/cardsDealing";
+import React, {useRef} from 'react';
 import style from './GamePage.module.css';
+import {useHistory} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
+import {setPointsAction} from "../../redux/actions/pointsAction";
+import {removeCards, setCards} from "../../redux/actions/cardsAction";
 
 
-class GamePage extends Component {
-    constructor(props) {
-        super(props);
-        this.cards = [...cardDeck];
-        this.computersPoints = 0;
-        this.playersPoints = 0;
-        this.roundNumber = 1;
-        this.nextStyle = style.redOnWhite;
-        this.state =
-            {
-                computersCards: cardsDealing(this.cards),
-                playersCards: this.cards,
-            }
-    }
+const GamePage = () => {
 
-    handleOnClickNext = () => {
-        this.nextStyle = this.nextStyle === style.redOnWhite ? style.whiteOnRed : style.redOnWhite;
-        if (this.state.playersCards.length === 1) {
-            this.addPoints();
-            this.props.changePage('result');
-            this.props.points(this.computersPoints, this.playersPoints)
-        } else {
-            this.addPoints();
-            this.removeCards();
-            this.roundNumber++;
-        }
-    }
-    removeCards = () => {
-        let temp = {...this.state}
-        temp.computersCards.splice(0, 1);
-        temp.playersCards.splice(0, 1);
-        this.setState(temp)
-    }
-    addPoints = () => {
-        const comp = parseInt(this.state.computersCards[0].cost);
-        const player = parseInt(this.state.playersCards[0].cost)
+	const history = useHistory();
+	const name = useSelector(state => state.name);
+	const points = useSelector(state => state.points);
+	const cards = useSelector(state => state.cards);
+	const dispatch = useDispatch();
 
-        if (comp > player)
-            this.computersPoints++;
-        else if (comp < player)
-            this.playersPoints++;
-    }
+	const roundNumber = useRef(1);
+	const nextStyle = useRef(style.redOnWhite);
 
-    render() {
-        return (
-            <div className={'container w-50 h-75  mt-3 shadow p-3 mb-5 bg-body-tertiary rounded'}>
-                <div className={'row text-center fs-4 fw-bold text-danger'}><span>Round {this.roundNumber}</span></div>
-                <div className={'row text-start mx-3 fs-5 fw-bold text-secondary'}>
-                    <span>Computer - {this.computersPoints} points</span></div>
-                <div className={'d-flex w-100  my-3 text-center'}>
-                    <div className={'col align-self-start '} style={{width: '120px', height: '170px'}}>
-                        <img src={this.state.computersCards[0].url} alt={this.state.computersCards[0].cost}
-                             width={'120px'} className={`${style.noSelect} shadow p-3 mb-5 bg-body-tertiary rounded`}/>
-                    </div>
-                    <div className={'col align-self-center '}>
-                        <div
-                            onClick={this.handleOnClickNext}
-                            className={`col align-self-center ${style.nextDiv}`}>
-                            <p className={this.nextStyle}>NEXT</p>
-                        </div>
-                    </div>
-                    <div className={'col align-self-end'} style={{width: '120px', height: '170px'}}>
-                        <img src={this.state.playersCards[0].url} alt={this.state.playersCards[0].cost}
-                             width={'120px'} className={`${style.noSelect} shadow p-3 mb-5 bg-body-tertiary rounded`}/>
-                    </div>
-                </div>
+	const handleOnClickNext = () => {
+		if (cards.playersCards.length === 1) {
+			dispatch(setCards());
+			history.push('result');
+		} else {
+			dispatch(removeCards());
+			roundNumber.current++;
+		}
+	}
 
-                <div className={'row text-end my-1 mx-4 mx-3 fs-5 fw-bold text-secondary'}>
-                    <span>{this.props.player || 'Player'} : {this.playersPoints} points</span></div>
-            </div>
-        );
-    }
+
+	return (
+		<div className={'container w-50 h-75  mt-3 shadow p-3 mb-5 bg-body-tertiary rounded'}>
+			<div className={'row text-center fs-4 fw-bold text-danger'}><span>Round {roundNumber.current}</span></div>
+			<div className={'row text-start mx-3 fs-5 fw-bold text-secondary'}>
+				<span>Computer - {points.computer} points</span></div>
+			<div className={'d-flex w-100  my-3 text-center'}>
+				<div className={'col align-self-start '} style={{width: '120px', height: '170px'}}>
+					<img src={cards.computersCard[0].url} alt={cards.computersCard[0].cost}
+					     width={'120px'} className={`${style.noSelect} shadow p-3 mb-5 bg-body-tertiary rounded`}/>
+				</div>
+				<div className={'col align-self-center '}>
+					<div
+						onClick={() => {
+							handleOnClickNext();
+							nextStyle.current = nextStyle.current === style.redOnWhite ? style.whiteOnRed : style.redOnWhite;
+							dispatch(setPointsAction(parseInt(cards.computersCard[0].cost), parseInt(cards.playersCards[0].cost)));
+						}}
+						className={`col align-self-center ${style.nextDiv}`}>
+						<p className={nextStyle.current}>NEXT</p>
+					</div>
+				</div>
+				<div className={'col align-self-end'} style={{width: '120px', height: '170px'}}>
+					<img src={cards.playersCards[0].url} alt={cards.playersCards[0].cost}
+					     width={'120px'} className={`${style.noSelect} shadow p-3 mb-5 bg-body-tertiary rounded`}/>
+				</div>
+			</div>
+
+			<div className={'row text-end my-1 mx-4 mx-3 fs-5 fw-bold text-secondary'}>
+				<span>{name || 'Player'} : {points.player} points</span></div>
+		</div>
+	);
+
 }
 
 export default GamePage;
